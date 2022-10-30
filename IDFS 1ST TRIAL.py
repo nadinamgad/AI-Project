@@ -25,7 +25,6 @@ class Maze:
        # self.right = None
        # self.left = None
        self.limit = limit
-
        self.maze = [ [1,2,1,1,1,1,1,1,1,1],
                      [1,0,0,0,0,0,0,0,0,1],
                      [1,0,0,0,0,0,0,0,0,1],
@@ -34,7 +33,7 @@ class Maze:
                      [1,0,1,0,1,1,1,1,0,1],
                      [1,0,0,0,0,0,0,0,0,1],
                      [1,1,1,1,1,1,1,1,2,1] ]
-
+       self.parent = node(self.start_x, self.start_y, None, self.maze[self.start_x][self.start_y], None, None, None, None)
     level = 0
     fringe = []
     visited = []
@@ -45,6 +44,60 @@ class Maze:
         self.right = None
         self.left = None
 
+    def check_visited(self, parent):
+        print('hi')
+        if len(self.visited) > 0:
+            print('hello')
+            if parent in self.visitied:
+                return True
+        return False
+    def PrintFringe(self):
+        print('fringe: ')
+        for i in self.fringe:
+            print('cell , x: ', i.x, ', y: ', i.y, ', v: ', i.v)
+            if i.up:
+                print('up: ', i.up)
+            if i.down:
+                print('down: ', i.down)
+            if i.right:
+                print('right: ', i.right)
+            if i.left:
+                print('left: ', i.left)
+
+    def PrintVisited(self):
+        print('visited:')
+        for i in self.visited:
+            print('cell , x: ', i.x, ', y: ', i.y, ', v: ', i.v)
+            if i.up:
+                print('up: ', i.up)
+            if i.down:
+                print('down: ', i.down)
+            if i.right:
+                print('right: ', i.right)
+            if i.left:
+                print('left: ', i.left)
+    def expandParent(self):
+        #print('hi')
+        if self.maze[self.parent.x + 1][self.parent.y] != 1:  #check down
+            self.down = True
+            #print(self.down)
+            child = node(self.parent.x + 1, self.parent.y, None, self.maze[self.parent.x + 1][self.parent.y],None,None,None,None)
+            self.fringe.append(child)
+
+        if self.maze[self.parent.x - 1][self.parent.y] != 1:  #check up
+            self.up = True
+            child = node(self.parent.x - 1, self.parent.y, None, self.maze[self.parent.x - 1][self.parent.y],None,None,None,None)
+            self.fringe.append(child)
+
+        if self.maze[self.parent.x][self.parent.y + 1] != 1: #right
+            self.right = True
+            child = node(self.parent.x, self.parent.y + 1, None, self.maze[self.parent.x][self.parent.y + 1], None,None,None,None)
+            self.fringe.append(child)
+
+        if self.maze[self.parent.x][self.parent.y - 1] != 1: #left
+            self.left = True
+            child = node(self.parent.x, self.parent.y - 1, None, self.maze[self.parent.x][self.parent.y - 1], None,None,None,None)
+            self.fringe.append(child)
     def check_path(self):
         # print('start: ', self.start_x, ', ' , self.start_y)
         # print('starting cell: ' ,self.maze[self.start_x][self.start_y])
@@ -54,40 +107,11 @@ class Maze:
         # print('left starting cell:', self.maze[self.start_x][self.start_y - 1])
         # print('child: ', self.start_x + 1, ', ' , self.start_y)
         self.initializeDirections()
-        parent = node(self.start_x,self.start_y,None, self.maze[self.start_x][self.start_y],None,None,None,None)
-        self.fringe.append(parent)
-        if self.maze[self.start_x + 1][self.start_y] != 1:  #check down
-            self.down = True
-            #print(self.down)
-            child = node(self.start_x + 1, self.start_y, None, self.maze[self.start_x + 1][self.start_y],None,None,None,None)
-            self.fringe.append(child)
 
-        if self.maze[self.start_x - 1][self.start_y] != 1:  #check up
-            self.up = True
-            child = node(self.start_x - 1, self.start_y, None, self.maze[self.start_x - 1][self.start_y],None,None,None,None)
-            self.fringe.append(child)
-
-        if self.maze[self.start_x][self.start_y + 1] != 1: #right
-            self.right = True
-            child = node(self.start_x, self.start_y + 1, None, self.maze[self.start_x][self.start_y + 1], None,None,None,None)
-            self.fringe.append(child)
-
-        if self.maze[self.start_x][self.start_y - 1] != 1: #left
-            self.left = True
-            child = node(self.start_x, self.start_y - 1, None, self.maze[self.start_x][self.start_y - 1], None,None,None,None)
-            self.fringe.append(child)
-
-        # for i in self.fringe:
-        #     print('cell , x: ', i.x, ', y: ', i.y, ', v: ', i.v)
-        #     if i.up:
-        #         print('up: ', i.up)
-        #     if i.down:
-        #         print('down: ', i.down)
-        #     if i.right:
-        #         print('right: ', i.right)
-        #     if i.left:
-        #         print('left: ', i.left)
-
+        self.fringe.append(self.parent)
+        #self.check_visited(parent)
+        if self.check_visited(self.parent) == False:
+            self.expandParent()
 
     def iterative_deepening(self):
         if self.level > self.limit:
@@ -96,33 +120,13 @@ class Maze:
         else:
             self.check_path()
             #self.fringe.pop()
-            print('fringe before pop')
-            for i in self.fringe:
-                print('cell , x: ', i.x, ', y: ', i.y, ', v: ', i.v)
-                if i.up:
-                    print('up: ', i.up)
-                if i.down:
-                    print('down: ', i.down)
-                if i.right:
-                    print('right: ', i.right)
-                if i.left:
-                    print('left: ', i.left)
+            self.PrintFringe()
 
             print('1st cell in fringe: , x: ', self.fringe[0].x, ', y: ', self.fringe[0].y, ', v: ', self.fringe[0].v)
             #print('stack , x: ', self.fringe.pop().x, ', y: ', self.fringe.pop().y, ', v: ', self.fringe.pop().v)
-            self.visited.append(self.fringe.pop())
-            print('fringe after pop')
-            for i in self.fringe:
-                print('cell , x: ', i.x, ', y: ', i.y, ', v: ', i.v)
-                if i.up:
-                    print('up: ', i.up)
-                if i.down:
-                    print('down: ', i.down)
-                if i.right:
-                    print('right: ', i.right)
-                if i.left:
-                    print('left: ', i.left)
-            print(self.visited[0].v)
+            self.parent = self.visited.append(self.fringe.pop())
+            self.PrintFringe()
+            self.PrintVisited()
             #self.visited.append(LIFO)
             # last_cell = len(self.visited) - 1
             # if self.visited[last_cell] == self.goal and last_cell > -1:
