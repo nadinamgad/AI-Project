@@ -3,10 +3,9 @@ import sys
 import math
 #import initialize_array as m
 #from Cbutton import button
+#from iterative import *
 pygame.init()
 
-bfs = False
-itd = False
 class button():
     def __init__(self, x, y, img, text, onclickfunction = None, click = False):
         self.x = x
@@ -34,6 +33,7 @@ class button():
 
             if pygame.mouse.get_pressed()[0] == 0:
                 self.click = False
+#--------------------------------------------------------------------------------------------------------------------------------
 class Maze:
     def __init__(self):
         #self.maze = maze
@@ -43,7 +43,7 @@ class Maze:
         self.goal_y = 0
         self.X=10
         self.Y=10
-        self.limit=15
+        self.limit=20
         #print(self.goal_x)
         self.maze = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -55,9 +55,6 @@ class Maze:
                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-
-
-
 
     def set_start(self, start_x, start_y):
         self.start_x = start_x
@@ -78,7 +75,6 @@ class Maze:
                     [0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0]]
-
 
     def read_maze(self):
         for x in self.maze:
@@ -129,6 +125,9 @@ class Maze:
 m=Maze()
 pathL=[]
 class Node:
+    x = 0
+    y = 0
+    color = (0,0,0)
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -140,12 +139,22 @@ class Node:
         self.up = None
         self.heuristic = 0
         self.v=0
+        self.width = 70
+        #-------------------------------------------------------------------------------------------------
+
+        #-------------------------------------------------------------------------------------------------
 
     def check_equality(self, x, y):
         return x == self.x and y == self.y
-
     def __str__(self):
         return "[" + str(self.x) + ", " + str(self.y) + "]"
+    def setcolor(self, color):
+        self.color = color
+
+    def getcolor(self):
+        return black
+    def draw(self, win):
+        pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
 
 class Game:
     pnns = []
@@ -260,9 +269,8 @@ class button_2():
             self.text2 = self.font.render('ITD', False, (50, 50, 0))
             self.text2_rect = self.text2.get_rect(center=(552, 835))
 
-    def display_buttons(self, screen, cursor):
-        bfs = False
-        itd = False
+    def display_buttons(self, screen, cursor, bfs, itd):
+        solution = []
         value = self.check_movement(cursor, self.button_rect, self.text_rect)
         if value:
             print('BFS')
@@ -276,7 +284,7 @@ class button_2():
             itd = True
             bfs = False
             print(itd)
-            iterative_deepening_search()
+            solution = iterative_deepening_search()
             # algorithim
             #algo.iterative_deepening_search()
 
@@ -284,7 +292,7 @@ class button_2():
         screen.blit(self.text1, self.text_rect)
         screen.blit(self.resize2, self.button_rect2)
         screen.blit(self.text2, self.text2_rect)
-        return bfs, itd
+        return bfs, itd,solution
 
 # start_btn = button(114, 48, start_btn, 'start', )
 screen_w = 755
@@ -300,6 +308,9 @@ dark_pink = '#DDB7AB'
 grey_green = '#9A9B87'
 brown = '#AD8E85'
 beige = '#F4EEED'
+neon_yellow = 'FFFF00'
+bfs = False
+itd = False
 fps = 60
 fpsClock = pygame.time.Clock()
 canvas = pygame.display.set_mode((screen_w, screen_h))
@@ -317,7 +328,8 @@ row = 0
 column = 0
 lrectangle = []
 lrectangle_row = []
-def draw_grid():
+
+def draw_grid(itd, solution):
     for row in range(10):
         for column in range(10):
             color = white
@@ -329,22 +341,39 @@ def draw_grid():
             if m.maze[row][column] == 3:
                 color = brown
                 Maze.set_goal(m,row,column)
-            pygame.draw.rect(canvas,
-                             color,
-                             [(margin + cell_size) * column + margin,
-                              (margin + cell_size) * row + margin,
-                              cell_size,
-                              cell_size])
+            # if itd == True:
+            #     #for r in range(len(solution)):
+            #     r = 1
+            #         #print(solution[r])
+            #     if m.maze[getattr(solution[r], 'x')][getattr(solution[r], 'y')] == 0:
+            #         #print('hi')
+            #         color = grey_green
+            #         print(solution[r])
+            #         print(m.maze[getattr(solution[r], 'x')][getattr(solution[r], 'y')])
+            if len(solution) == 0:
+                pygame.draw.rect(canvas,
+                                 color,
+                                 [(margin + cell_size) * column + margin,
+                                  (margin + cell_size) * row + margin,
+                                  cell_size,
+                                  cell_size])
+            else:
+                for r in range(len(solution)):
+                    x = getattr(solution[r], 'x')
+                    y = getattr(solution[r], 'y')
+                    print(x,y)
+                    pygame.draw.rect(canvas, (0, 0, 0), [margin + (cell_size * y) + margin, margin + (cell_size * x) + margin, cell_size, cell_size], 0)
+
+
 
 new_buttons = button_2()
-
-
+solution = []
+drag = False
 while True:
-    draw_grid()
     for event in pygame.event.get():
         curser = pygame.mouse.get_pos()
         new_buttons.hover(curser[0], curser[1])
-        status = new_buttons.display_buttons(canvas, curser)
+        status = new_buttons.display_buttons(canvas, curser, bfs, itd)
         if event.type == pygame.QUIT:
             pygame.quit()
             #iterative_deepening_search()
@@ -352,26 +381,45 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_position = pygame.mouse.get_pos()
             new_buttons.hover(mouse_position[0], mouse_position[1])
+            #status = new_buttons.display_buttons()
             column = mouse_position[0] // (cell_size + margin)
             row = mouse_position[1] // (cell_size + margin)
-            print(row, ',', column)
+            #print(row, ',', column)
+            if mouse_position[1] < 750 and mouse_position[1] > 0:
+                drag = True
+                click += 1
+                if click == 1:
+                    m.maze[row][column] = 2
+                if click == 2:
+                    m.maze[row][column] = 3
+                # if click > 2:
+                #     m.maze[row][column] = 1
 
-            click += 1
-            if click == 1 and status[0] == False and status[1] == False:
-                m.maze[row][column] = 2
-            elif click == 2 and status[0] == False and status[1] == False:
-                m.maze[row][column] = 3
+            # if click == 1 and status[0] == False and status[1] == False:
+            #     m.maze[row][column] = 2
+            # elif click == 2 and status[0] == False and status[1] == False:
+            #     m.maze[row][column] = 3
                 # print(status[0])
                 # print(status[1])
-            elif click > 2 and status[0] == False and status[1] == False:
-                m.maze[row][column] = 1
 
+
+            print(mouse_position)
             print(m.maze)
-
-
+        if event.type == pygame.MOUSEMOTION and drag == True:
+            mouse_position2 = pygame.mouse.get_pos()
+            column = mouse_position2[0] // (cell_size + margin)
+            row = mouse_position2[1] // (cell_size + margin)
+            if click > 2:
+                m.maze[row][column] = 1
+        if event.type == pygame.MOUSEBUTTONUP:
+            drag = False
+    status = new_buttons.display_buttons(canvas, curser, bfs, itd)
+    if len(status[2]) > 0:
+        solution = status[2]
+    print('status: ', solution)
+    draw_grid(status[1], solution)
 
     #------------------------------------------------------------------------------------
-
     game = Game()
     fringe = []
     visited = []
@@ -379,17 +427,8 @@ while True:
 
     def iterative_deepening_search():
         game.clear_parents()
-        ids()
-
-
-    game = Game()
-    fringe = []
-    visited = []
-
-
-    def iterative_deepening_search():
-        game.clear_parents()
-        ids()
+        solution = ids()
+        return solution
 
 
     def ids():
@@ -445,6 +484,8 @@ while True:
             current = current.parent
 
         results(solution, expanded_nodes)
+        itd = True
+        return solution
 
 
     def add_to_fringe(current_node, f):
@@ -483,7 +524,6 @@ while True:
             return True
         return False
 
-
     def is_goal(node):
         # print(game.maze.goal_x)
 
@@ -496,8 +536,8 @@ while True:
         else:
             return False
 
-
     def results(solution, expanded_nodes):
+        itd = True
         print(("# of nodes in solution path is :  " + str(len(solution))))
         print("Solution path is :", end=" ")
         for i in solution:
@@ -512,6 +552,38 @@ while True:
                 print(expanded_nodes[i], end=" ")
 
         print("\n")
+
+
+    def BFS():
+        solution = []
+
+        if len(fringe) == 0:
+            fringe.append(game.root)
+
+        while (len(fringe) > 0):
+            current_node = fringe.pop(0)
+
+            if current_node not in visited:
+                visited.append(current_node)
+
+            if is_goal(visited[len(visited) - 1]):
+                break
+
+        parent = current_node
+
+
+
+    # if goal_state is None:
+    #     print("No goal state found.")
+    #     return
+    #
+    # current = goal_state
+    #
+    # while current is not None:
+    #     solution.insert(0, current)
+    #     current = current.parent
+    #
+    # results(solution, expanded_nodes)
 
     pygame.display.update()
 
